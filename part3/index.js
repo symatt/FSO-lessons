@@ -82,6 +82,15 @@ app.post('/api/notes', (request, response) => {
 	response.json(note);
 });
 
+app.put('/api/notes/:id', (request, response) => {
+	const id = Number(request.params.id);
+	const note = notes.find((n) => n.id === id);
+	const changedNote = { ...note, important: !note.important };
+	notes = notes.map((note) => (note.id !== id ? note : changedNote));
+	console.log(notes);
+	response.status(204).end();
+});
+
 const unknownEndpoint = (request, response) => {
 	response.status(404).send({ error: 'unknown endpoint' });
 };
