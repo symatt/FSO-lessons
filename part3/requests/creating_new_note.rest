@@ -12,3 +12,21 @@ GET http://localhost:3001/api/notes
 
 ###
 GET https://fso-phonebook-zeos.onrender.com/
+
+###
+PUT http://localhost:3001/api/notes/64a8cfd99002804a029ef01f
+Content-Type: application/json
+
+{
+    "content": "newnote",
+    "important": false
+}
+
+###
+POST http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+    "content": "lol",
+    "important": true
+}
