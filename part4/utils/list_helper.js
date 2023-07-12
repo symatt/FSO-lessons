@@ -37,19 +37,36 @@ const mostBlogs = (blogs) => {
 	};
 };
 
-// const mostLikes = (blogs) => {
-// 	const authorsCount = lodash;
-// 	console.log('LODASH COUNT BY LIKES: ', authorsCount);
-// 	return {
-// 		author: 'test',
-// 		likes: 1,
-// 	};
-// };
+const mostLikes = (blogs) => {
+	// const authorsCount = blogs.map((blog) => {
+	// 	return { author: blog.author, likes: blog.likes };
+	// });
+	// console.log('LODASH COUNT BY LIKES: ', authorsCount);
+
+	const authorsCount = lodash(blogs)
+		.groupBy('author')
+		.map((objs, key) => ({
+			author: key,
+			likes: lodash.sumBy(objs, 'likes'),
+		}))
+		.value();
+	// console.log('LODASH COUNT BY AUTHOR: ', authorsCount);
+	// console.log('mapping', lodash.map(authorsCount, 'likes'));
+	const maxLikes = Math.max(...lodash.map(authorsCount, 'likes'));
+	// console.log('LODASH MAX COUNT: ', maxLikes);
+	const author = lodash.find(authorsCount, (a) => a.likes === maxLikes);
+	// console.log(author);
+
+	return {
+		author: author.author,
+		likes: author.likes,
+	};
+};
 
 module.exports = {
 	dummy,
 	totalLikes,
 	favoriteBlog,
 	mostBlogs,
-	// mostLikes,
+	mostLikes,
 };
