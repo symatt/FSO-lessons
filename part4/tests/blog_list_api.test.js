@@ -107,6 +107,38 @@ test('blog without url is not added', async () => {
 	expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length);
 });
 
+describe('deletion of a blog', () => {
+	test('succeeds with status code 204 if id is valid', async () => {
+		const blogsAtStart = await helper.blogsInDb();
+		const blogToDelete = blogsAtStart[0];
+
+		await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+
+		const blogsAtEnd = await helper.blogsInDb();
+		expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length - 1);
+
+		const titles = blogsAtEnd.map((r) => r.title);
+		expect(titles).not.toContain(blogToDelete.title);
+	});
+});
+
+describe('update of a blog', () => {
+	test('succeeds with the new list of blogs if likes were updated', async () => {
+		const blogsAtStart = await helper.blogsInDb();
+		const blogToUpdate = blogsAtStart[0];
+
+		const updatedBody = { ...blogToUpdate, likes: 1 };
+
+		await api.put(`/api/blogs/${updatedBody.id}`).send(updatedBody).expect(200);
+
+		const blogsAtEnd = await helper.blogsInDb();
+		const updatedBlog = blogsAtEnd.filter(
+			(b) => b.title === blogToUpdate.title
+		);
+		expect(updatedBlog[0].likes).toEqual(1);
+	});
+});
+
 afterAll(async () => {
 	await mongoose.connection.close();
 });
