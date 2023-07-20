@@ -2,12 +2,14 @@ const mongoose = require('mongoose');
 const supertest = require('supertest');
 const app = require('../app');
 const Blog = require('../models/blog');
+const User = require('../models/user');
 const helper = require('./test_helper');
 
 const api = supertest(app);
 
 beforeEach(async () => {
 	await Blog.deleteMany({});
+	await User.deleteMany({});
 
 	for (let blog of helper.initialBlogs) {
 		let blogObject = new Blog(blog);
@@ -41,16 +43,34 @@ test('blogs have an id', async () => {
 	expect(ids).toBeDefined();
 });
 
-test('a valid blog can be added', async () => {
+test('a valid blog can be added by a user that is logged in', async () => {
+	await api
+		.post('/api/users')
+		.send(helper.testUser)
+		.expect(201)
+		.expect('Content-Type', /application\/json/);
+
+	const userDetails = {
+		username: 'user1',
+		password: 'password',
+	};
+
+	const userToken = await api
+		.post('/api/login')
+		.send(userDetails)
+		.expect(200)
+		.expect('Content-Type', /application\/json/);
+
 	const newBlog = {
 		title: 'newblog',
-		author: 'newauthor',
+		author: 'me',
 		url: 'newblog.com',
 		likes: 99999,
 	};
 
 	await api
 		.post('/api/blogs')
+		.set('Authorization', userToken.token)
 		.send(newBlog)
 		.expect(201)
 		.expect('Content-Type', /application\/json/);
@@ -59,10 +79,10 @@ test('a valid blog can be added', async () => {
 	expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1);
 
 	const titles = blogsAtEnd.map((b) => b.title);
-	expect(titles).toContain('React patterns');
+	expect(titles).toContain('newblog');
 });
 
-test('a nwe blog with no likes shows 0 likes', async () => {
+test('a new blog with no likes shows 0 likes', async () => {
 	const newBlog = {
 		title: 'zero likes blog',
 		author: 'newauthor',
