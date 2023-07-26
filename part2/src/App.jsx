@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import Note from './components/Note';
 import noteService from './services/notes';
 import Notification from './components/Notfication';
@@ -64,6 +63,7 @@ const App = () => {
 				setNotes(notes.map((note) => (note.id !== id ? note : returnedNote)));
 			})
 			.catch((error) => {
+				console.log(error);
 				setErrorMessage(
 					`the note '${note.content}' was already deleted from server`
 				);
@@ -96,7 +96,7 @@ const App = () => {
 		}
 	};
 
-	const handleLogout = (event) => {
+	const handleLogout = () => {
 		window.localStorage.removeItem('loggedNoteappUser');
 		setUser(null);
 		setErrorMessage('Logged out');
